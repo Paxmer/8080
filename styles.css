@@ -1,0 +1,208 @@
+:root {
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --primary-color: #2563eb;
+    --secondary-color: #64748b;
+    --text-color: #1e293b;
+    --border-color: #e2e8f0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+main {
+    display: flex;
+    flex: 1;
+    padding: 1rem;
+    gap: 1rem;
+    overflow: hidden;
+}
+
+section {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 1rem;
+}
+
+#editor-section {
+    flex: 1;
+}
+
+#emulator-section {
+    flex: 2;
+    overflow-y: auto;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    border-bottom: 2px solid var(--bg-color);
+    padding-bottom: 0.5rem;
+}
+
+textarea {
+    flex: 1;
+    width: 100%;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.controls {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    align-items: center;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+button:disabled {
+    background-color: var(--secondary-color);
+    cursor: not-allowed;
+}
+
+#status-badge {
+    margin-left: auto;
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: #e2e8f0;
+}
+
+.cpu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
+}
+
+.card {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.75rem;
+}
+
+.card h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    color: var(--secondary-color);
+}
+
+.reg-row, .flags-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.reg-box, .flag-box {
+    flex: 1;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    text-align: center;
+    background: #f8fafc;
+}
+
+.reg-box span, .flag-box span {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--secondary-color);
+    padding: 2px 0;
+    background: #f1f5f9;
+}
+
+.reg-box div, .flag-box div {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 4px 0;
+}
+
+.reg-box.extended {
+    flex: 2;
+}
+
+.memory {
+    grid-column: span 2;
+}
+
+.mem-controls {
+    margin-bottom: 0.5rem;
+}
+
+#memory-table {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    display: grid;
+    grid-template-columns: auto repeat(16, 1fr);
+    gap: 2px;
+    background: var(--border-color);
+    border: 1px solid var(--border-color);
+}
+
+.mem-cell {
+    background: white;
+    padding: 2px;
+    text-align: center;
+}
+
+.mem-header {
+    background: #f1f5f9;
+    font-weight: bold;
+}
+
+.mem-addr {
+    background: #f1f5f9;
+    padding: 2px 5px;
+    font-weight: bold;
+}
+
+#assembler-output {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.error { color: #dc2626; background: #fee2e2; }
+.success { color: #16a34a; background: #f0fdf4; }
