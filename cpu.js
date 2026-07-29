@@ -160,10 +160,17 @@ class Intel8080 {
             const reg = (opcode >> 3) & 0x07;
             const val = this.getRegByCode(reg);
             const isDcr = (opcode & 0x07) === 0x05;
-            const res = isDcr ? (val - 1) : (val + 1);
-            this.setRegByCode(reg, res);
-            this.updateFlags(res);
-            this.flags.ac = isDcr ? ((val & 0x0F) === 0) : ((val & 0x0F) === 0x0F);
+            if (isDcr) {
+                const res = (val - 1) & 0xFF;
+                this.setRegByCode(reg, res);
+                this.updateFlags(res);
+                this.flags.ac = !((res & 0x0F) === 0x0F); // Equivalent to "not (borrow out of low nibble)"
+            } else {
+                const res = (val + 1) & 0xFF;
+                this.setRegByCode(reg, res);
+                this.updateFlags(res);
+                this.flags.ac = (val & 0x0F) === 0x0F;
+            }
             return;
         }
 
@@ -246,9 +253,9 @@ class Intel8080 {
             case 0xE9: this.registers.pc = this.getRP('hl'); break; // PCHL
 
             // Rotates & Flags
-            case 0x07: { const c = (this.registers.a >> 7) & 1; this.registers.a = (this.registers.a << 1) | c; this.flags.cy = !!c; break; } // RLC
-            case 0x0F: { const c = this.registers.a & 1; this.registers.a = (this.registers.a >> 1) | (c << 7); this.flags.cy = !!c; break; } // RRC
-            case 0x17: { const c = this.flags.cy ? 1 : 0; this.flags.cy = !!((this.registers.a >> 7) & 1); this.registers.a = (this.registers.a << 1) | c; break; } // RAL
+            case 0x07: { const c = (this.registers.a >> 7) & 1; this.registers.a = ((this.registers.a << 1) | c) & 0xFF; this.flags.cy = !!c; break; } // RLC
+            case 0x0F: { const c = this.registers.a & 1; this.registers.a = ((this.registers.a >> 1) | (c << 7)) & 0xFF; this.flags.cy = !!c; break; } // RRC
+            case 0x17: { const c = this.flags.cy ? 1 : 0; this.flags.cy = !!((this.registers.a >> 7) & 1); this.registers.a = ((this.registers.a << 1) | c) & 0xFF; break; } // RAL
             case 0x1F: { const c = this.flags.cy ? 1 : 0; this.flags.cy = !!(this.registers.a & 1); this.registers.a = ((this.registers.a >> 1) | (c << 7)) & 0xFF; break; } // RAR
             case 0x2F: this.registers.a = (~this.registers.a) & 0xFF; break; // CMA
             case 0x27: this.daa(); break; // DAA
@@ -282,14 +289,17 @@ class Intel8080 {
             case 2: // SUB
                 res = this.registers.a - val;
                 this.flags.cy = res < 0;
-                this.flags.ac = (this.registers.a & 0x0F) < (val & 0x0F);
+                // Intel 8080 logic for auxiliary carry in subtraction:
+                // AC is calculated by adding the 4-bit inverted value plus 1
+                this.flags.ac = ((this.registers.a & 0x0F) + ((~val) & 0x0F) + 1) > 0x0F;
                 this.registers.a = res & 0xFF;
                 break;
             case 3: // SBB
                 const b = this.flags.cy ? 1 : 0;
                 res = this.registers.a - val - b;
                 this.flags.cy = res < 0;
-                this.flags.ac = (this.registers.a & 0x0F) < (val & 0x0F) + b;
+                // Low-level addition logic: A + ~val + ~b. ~b is 1 if b=0, and 0 if b=1.
+                this.flags.ac = ((this.registers.a & 0x0F) + ((~val) & 0x0F) + (b ? 0 : 1)) > 0x0F;
                 this.registers.a = res & 0xFF;
                 break;
             case 4: // ANA
@@ -313,7 +323,7 @@ class Intel8080 {
             case 7: // CMP
                 res = this.registers.a - val;
                 this.flags.cy = res < 0;
-                this.flags.ac = (this.registers.a & 0x0F) < (val & 0x0F);
+                this.flags.ac = ((this.registers.a & 0x0F) + ((~val) & 0x0F) + 1) > 0x0F;
                 this.updateFlags(res);
                 return;
         }

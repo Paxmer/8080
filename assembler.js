@@ -78,9 +78,10 @@ class Assembler8080 {
             'EI': { code: 0xFB, bytes: 1 },
             'CM': { code: 0xFC, bytes: 3 },
             'CPI': { code: 0xFE, bytes: 2 },
+            'RST': { bytes: 1 },
         };
         this.regs = { 'B': 0, 'C': 1, 'D': 2, 'E': 3, 'H': 4, 'L': 5, 'M': 6, 'A': 7 };
-        this.rps = { 'B': 0, 'C': 0, 'D': 1, 'E': 1, 'H': 2, 'L': 2, 'SP': 3, 'PSW': 3 };
+        this.rps = { 'B': 0, 'C': 0, 'D': 1, 'E': 1, 'H': 2, 'L': 2, 'SP': 3, 'PSW': 3, 'BC': 0, 'DE': 1, 'HL': 2 };
     }
 
     assemble(source) {
@@ -156,36 +157,57 @@ class Assembler8080 {
         const r2 = tokens[2] ? tokens[2].toUpperCase() : null;
 
         if (mnemonic === 'MOV') {
+            if (this.regs[r1] === undefined) throw new Error(`Invalid register: ${r1} in MOV instruction`);
+            if (this.regs[r2] === undefined) throw new Error(`Invalid register: ${r2} in MOV instruction`);
+            if (r1 === 'M' && r2 === 'M') throw new Error(`Cannot use MOV M, M (invalid instruction)`);
             byte1 = 0x40 | (this.regs[r1] << 3) | this.regs[r2];
         } else if (mnemonic === 'MVI') {
+            if (this.regs[r1] === undefined) throw new Error(`Invalid register: ${r1} in MVI instruction`);
             byte1 = 0x06 | (this.regs[r1] << 3);
             byte2 = this.parseValue(tokens[2], labels) & 0xFF;
         } else if (mnemonic === 'LXI') {
+            if (this.rps[r1] === undefined) throw new Error(`Invalid register pair: ${r1} in LXI instruction`);
             byte1 = 0x01 | (this.rps[r1] << 4);
             const val = this.parseValue(tokens[2], labels);
             byte2 = val & 0xFF;
             byte3 = (val >> 8) & 0xFF;
         } else if (['ADD', 'ADC', 'SUB', 'SBB', 'ANA', 'XRA', 'ORA', 'CMP'].includes(mnemonic)) {
+            if (this.regs[r1] === undefined) throw new Error(`Invalid register: ${r1} in ${mnemonic} instruction`);
             const base = { 'ADD': 0x80, 'ADC': 0x88, 'SUB': 0x90, 'SBB': 0x98, 'ANA': 0xA0, 'XRA': 0xA8, 'ORA': 0xB0, 'CMP': 0xB8 };
             byte1 = base[mnemonic] | this.regs[r1];
         } else if (mnemonic === 'INR') {
+            if (this.regs[r1] === undefined) throw new Error(`Invalid register: ${r1} in INR instruction`);
             byte1 = 0x04 | (this.regs[r1] << 3);
         } else if (mnemonic === 'DCR') {
+            if (this.regs[r1] === undefined) throw new Error(`Invalid register: ${r1} in DCR instruction`);
             byte1 = 0x05 | (this.regs[r1] << 3);
         } else if (mnemonic === 'INX') {
+            if (this.rps[r1] === undefined) throw new Error(`Invalid register pair: ${r1} in INX instruction`);
             byte1 = 0x03 | (this.rps[r1] << 4);
         } else if (mnemonic === 'DCX') {
+            if (this.rps[r1] === undefined) throw new Error(`Invalid register pair: ${r1} in DCX instruction`);
             byte1 = 0x0B | (this.rps[r1] << 4);
         } else if (mnemonic === 'DAD') {
+            if (this.rps[r1] === undefined) throw new Error(`Invalid register pair: ${r1} in DAD instruction`);
             byte1 = 0x09 | (this.rps[r1] << 4);
         } else if (mnemonic === 'PUSH') {
+            if (this.rps[r1] === undefined) throw new Error(`Invalid register pair: ${r1} in PUSH instruction`);
             byte1 = 0xC5 | (this.rps[r1] << 4);
         } else if (mnemonic === 'POP') {
+            if (this.rps[r1] === undefined) throw new Error(`Invalid register pair: ${r1} in POP instruction`);
             byte1 = 0xC1 | (this.rps[r1] << 4);
         } else if (mnemonic === 'STAX') {
+            if (this.rps[r1] === undefined) throw new Error(`Invalid register pair: ${r1} in STAX instruction`);
             byte1 = 0x02 | (this.rps[r1] << 4);
         } else if (mnemonic === 'LDAX') {
+            if (this.rps[r1] === undefined) throw new Error(`Invalid register pair: ${r1} in LDAX instruction`);
             byte1 = 0x0A | (this.rps[r1] << 4);
+        } else if (mnemonic === 'RST') {
+            const val = this.parseValue(tokens[1], labels);
+            if (isNaN(val) || val < 0 || val > 7) {
+                throw new Error(`Invalid RST number: ${tokens[1]}. Must be 0-7.`);
+            }
+            byte1 = 0xC7 | (val << 3);
         } else if (line.info.bytes === 3) { // JMP, CALL, etc.
             const val = this.parseValue(tokens[1], labels);
             byte2 = val & 0xFF;
@@ -200,9 +222,28 @@ class Assembler8080 {
     parseValue(val, labels = {}) {
         if (!val) return 0;
         if (labels[val] !== undefined) return labels[val];
-        if (val.endsWith('H') || val.endsWith('h')) return parseInt(val.slice(0, -1), 16);
-        if (val.startsWith('0X') || val.startsWith('0x')) return parseInt(val, 16);
-        return parseInt(val, 10);
+
+        // If it starts with a letter and is not a hex constant, it might be an undefined label
+        const isHexConstant = val.endsWith('H') || val.endsWith('h') || val.startsWith('0X') || val.startsWith('0x');
+
+        let parsed;
+        if (val.endsWith('H') || val.endsWith('h')) {
+            parsed = parseInt(val.slice(0, -1), 16);
+        } else if (val.startsWith('0X') || val.startsWith('0x')) {
+            parsed = parseInt(val, 16);
+        } else {
+            parsed = parseInt(val, 10);
+        }
+
+        if (isNaN(parsed)) {
+            // Check if it looks like a label (starts with letter)
+            if (/^[A-Za-z_]/.test(val)) {
+                throw new Error(`Undefined label: ${val}`);
+            } else {
+                throw new Error(`Invalid numeric value or token: ${val}`);
+            }
+        }
+        return parsed;
     }
 }
 
