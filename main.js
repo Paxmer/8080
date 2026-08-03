@@ -28,6 +28,42 @@ function updateUI() {
     document.getElementById('status-badge').style.backgroundColor = cpu.halted ? '#fee2e2' : (runInterval ? '#f0fdf4' : '#e2e8f0');
 
     renderMemory();
+    renderStack();
+}
+
+function renderStack() {
+    const table = document.getElementById('stack-table');
+    if (!table) return;
+    table.innerHTML = '';
+
+    const currentSP = cpu.registers.sp;
+
+    // Show 5 slots (2-byte aligned) from SP - 4 to SP + 6
+    for (let offset = 6; offset >= -4; offset -= 2) {
+        const addr = (currentSP + offset) & 0xFFFF;
+
+        const row = document.createElement('div');
+        row.className = 'stack-row';
+        if (offset === 0) {
+            row.classList.add('active');
+        }
+
+        const addrSpan = document.createElement('span');
+        addrSpan.className = 'stack-addr';
+        addrSpan.textContent = (offset === 0 ? 'SP ➔ ' : '     ') + addr.toString(16).toUpperCase().padStart(4, '0') + ':';
+
+        const low = cpu.readMemory(addr);
+        const high = cpu.readMemory((addr + 1) & 0xFFFF);
+        const val16 = (high << 8) | low;
+
+        const valSpan = document.createElement('span');
+        valSpan.className = 'stack-val';
+        valSpan.textContent = val16.toString(16).toUpperCase().padStart(4, '0') + 'H (' + high.toString(16).toUpperCase().padStart(2, '0') + ' ' + low.toString(16).toUpperCase().padStart(2, '0') + ')';
+
+        row.appendChild(addrSpan);
+        row.appendChild(valSpan);
+        table.appendChild(row);
+    }
 }
 
 function renderMemory() {
