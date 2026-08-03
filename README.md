@@ -1,20 +1,22 @@
-# Intel 8080 Emulator & Assembler - Version 2.0.0
+# Intel 8080 Emulator & Assembler - Version 2.1.0
 
 A web-based Intel 8080 CPU emulator and assembler built with 100% pure JavaScript, HTML, and CSS. No frameworks, no dependencies. Designed for educational purposes and fully compatible with GitHub Pages.
 
 ---
 
-## What's New in Version 2.0.0 (V2) 🚀
+## What's New in Version 2.1.0 (V2.1) 🚀
 
-- **Correct CPU Flag Management**:
+- **Clear Code Button**: Added a new interactive "Clear Code" button next to "Assemble & Load" to easily clear the assembler code panel and status outputs.
+- **Improved Reset Behavior**: Pressing the "Reset" button now completely resets everything—clearing CPU memory, resetting registers and status flags, halting active program intervals, clearing compiler messages, and resetting the memory view's starting pointer back to `0000H`.
+- **Correct CPU Flag Management (V2)**:
   - **Auxiliary Carry (`AC`) flag** calculations are fully corrected for subtraction instructions (`SUB`, `SBB`, `CMP`) and decrements (`DCR`), matching the exact micro-operation behaviors of the physical Intel 8080 chip.
   - Added strict 8-bit masking (`& 0xFF`) on all rotates (`RLC`, `RAL`, etc.) to prevent accumulator overflow and ensure emulator stability.
-- **Enhanced Assembler**:
+- **Enhanced Assembler (V2)**:
   - Supports register pair aliases natively (`BC`, `DE`, `HL`, `SP`, `PSW`). For example, you can write `LXI BC, 1000H` and it compiles perfectly.
   - Strict assembler validations that reject illegal combinations such as `MOV M, M` or invalid registers (e.g. `MOV B, X`).
   - Strict validation of labels that prevents silent compilation failures when utilizing undefined labels.
   - Fully supports `RST` (Restart) instruction assembly.
-- **Visual "Version 2" Badge**: Beautiful and stylized badge added to the header interface.
+- **Visual "Version 2.1" Badge**: Beautiful and stylized badge added to the header interface.
 - **Unit and Regression Test Suite**: A comprehensive test suite in `test.js` to ensure the core CPU and Assembler stability.
 - **Comprehensive Spanish Documentation (`INSTRUCTIONS.md`)**: A detailed manual detailing all commands, directives, registers, instruction sets, and a complete interactive **"Hello World"** template program!
 
@@ -92,5 +94,5 @@ node test.js
 Simply push this repository to GitHub and enable **GitHub Pages** in the repository settings.
 
 ---
-**Version**: 2.0.0
+**Version**: 2.1.0
 **License**: MIT
