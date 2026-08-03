@@ -81,6 +81,15 @@ document.getElementById('btn-assemble').addEventListener('click', () => {
     }
 });
 
+document.getElementById('btn-clear-code').addEventListener('click', () => {
+    document.getElementById('code-editor').value = '';
+    const output = document.getElementById('assembler-output');
+    if (output) {
+        output.textContent = '';
+        output.className = '';
+    }
+});
+
 document.getElementById('btn-step').addEventListener('click', () => {
     cpu.step();
     updateUI();
@@ -113,7 +122,26 @@ document.getElementById('btn-stop').addEventListener('click', () => {
 });
 
 document.getElementById('btn-reset').addEventListener('click', () => {
+    if (runInterval) {
+        clearInterval(runInterval);
+        runInterval = null;
+    }
     cpu.reset();
+
+    // Clear assembler output
+    const output = document.getElementById('assembler-output');
+    if (output) {
+        output.textContent = '';
+        output.className = '';
+    }
+
+    // Reset memory start address and variable
+    const memStartInput = document.getElementById('mem-start-addr');
+    if (memStartInput) {
+        memStartInput.value = '0000';
+    }
+    memoryStart = 0;
+
     updateUI();
 });
 
