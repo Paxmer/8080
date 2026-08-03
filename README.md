@@ -6,6 +6,8 @@ A web-based Intel 8080 CPU emulator and assembler built with 100% pure JavaScrip
 
 ## What's New in Version 2.1.0 (V2.1) 🚀
 
+- **Stack View**: Interactive visual stack tracker panel displays the memory content around the Stack Pointer (`SP`), showing both 16-bit word values and high/low bytes.
+- **Explanatory Flag Tooltips**: Hovering over the state flags (`S`, `Z`, `AC`, `P`, `CY`) displays detailed Spanish definitions describing why they change and how they are calculated.
 - **Clear Code Button**: Added a new interactive "Clear Code" button next to "Assemble & Load" to easily clear the assembler code panel and status outputs.
 - **Improved Reset Behavior**: Pressing the "Reset" button now completely resets everything—clearing CPU memory, resetting registers and status flags, halting active program intervals, clearing compiler messages, and resetting the memory view's starting pointer back to `0000H`.
 - **Correct CPU Flag Management (V2)**:
@@ -34,7 +36,8 @@ A web-based Intel 8080 CPU emulator and assembler built with 100% pure JavaScrip
   - Handles hex (e.g., `12H`, `0x12`) and decimal values.
 - **CPU Dashboard**:
   - Real-time visualization of all registers (A, B, C, D, E, H, L, PC, SP).
-  - Individual flag indicators.
+  - Individual flag indicators with detailed interactive tooltips.
+  - Interactive **Stack View** showing 16-bit word values and high/low bytes surrounding the Stack Pointer (`SP`).
   - Status display (Idle, Running, Halted).
 - **Interactive Memory Viewer**:
   - Live memory grid with search-by-address functionality.
