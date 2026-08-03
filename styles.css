@@ -118,6 +118,12 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.btn-clear {
+    background-color: var(--secondary-color);
+    color: white;
+    cursor: pointer;
+}
+
 #status-badge {
     margin-left: auto;
     font-weight: bold;

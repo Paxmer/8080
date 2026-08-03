@@ -24,6 +24,9 @@ class Intel8080 {
             cy: false
         };
         this.halted = false;
+        if (this.memory) {
+            this.memory.fill(0);
+        }
     }
 
     getRP(rp) {
