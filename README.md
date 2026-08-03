@@ -36,6 +36,10 @@ A web-based Intel 8080 CPU emulator and assembler built with 100% pure JavaScrip
   - Real-time visualization of all registers (A, B, C, D, E, H, L, PC, SP).
   - Individual flag indicators.
   - Status display (Idle, Running, Halted).
+- **8-bit Value Model**:
+  - Main registers store one byte (`00H` to `FFH`).
+  - Values can be interpreted as unsigned `0` to `255` or signed `-128` to `+127`.
+  - See `INSTRUCTIONS.md` for notes about overflow/truncation, such as `MVI A, 2400` keeping only the low byte.
 - **Interactive Memory Viewer**:
   - Live memory grid with search-by-address functionality.
   - Highlights the current instruction pointer (PC).

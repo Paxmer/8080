@@ -11,6 +11,7 @@
 3. [Guía de Referencia de Instrucciones Básicas (Set de Instrucciones)](#3-guía-de-referencia-de-instrucciones-básicas-set-de-instrucciones)
 4. [Ejemplo Clásico: Programa "Hola Mundo" (Hello World)](#4-ejemplo-clásico-programa-hola-mundo-hello-world)
 5. [Otros Ejemplos Prácticos](#5-otros-ejemplos-prácticos)
+6. [Tutorial Progresivo de Aritmética](#6-tutorial-progresivo-de-aritmética)
 
 ---
 
@@ -47,6 +48,19 @@ El ensamblador de este emulador traduce el código mnemónico a código de máqu
 - **Constantes Numéricas:**
   - **Hexadecimal:** Soportado con sufijo `H` / `h` (ej. `12H`, `FFh`) o prefijo `0x` / `0X` (ej. `0x12`, `0xFF`).
   - **Decimal:** Números sin prefijos ni sufijos (ej. `10`, `255`).
+
+### Rango de Valores de 8 bits
+
+El Intel 8080 es un procesador de 8 bits para sus registros principales (`A`, `B`, `C`, `D`, `E`, `H`, `L`). Eso significa que cada uno de esos registros solo puede almacenar un byte, es decir, valores entre `00H` y `FFH`.
+
+Ese mismo byte puede interpretarse de dos formas comunes:
+
+- **Sin signo:** `0` a `255` decimal (`00H` a `FFH`).
+- **Con signo:** `-128` a `+127` decimal, usando complemento a dos.
+
+Por ejemplo, el byte `F1H` puede leerse como `241` si se interpreta sin signo, o como `-15` si se interpreta con signo. El CPU no guarda la palabra "positivo" o "negativo"; solo guarda bits. La interpretación depende del programa y del contexto.
+
+Si una instrucción de 8 bits recibe un valor mayor que `255`, no cabe completo en un registro de 8 bits. Por ejemplo, `2400` decimal equivale a `0960H`. En una carga inmediata de 8 bits como `MVI A, 2400`, este emulador conserva solo el byte bajo (`60H`) porque `MVI` carga únicamente 8 bits. Para trabajar con valores de 16 bits se usan pares de registros e instrucciones específicas, como `LXI`, `INX`, `DCX` y `DAD`.
 
 ### Directivas Soportadas:
 1. **`ORG <dirección>` (Origin):** Establece la dirección inicial del Program Counter donde se cargará el programa siguiente.
@@ -186,3 +200,287 @@ BUCLE:  MOV A, B      ; Cargamos el valor de conteo en A
 
         HLT           ; Detiene el CPU al finalizar el conteo
 ```
+
+---
+
+## 6. Tutorial Progresivo de Aritmética
+
+Esta sección resume una ruta de aprendizaje recomendada para practicar con estudiantes. La idea es ejecutar cada programa con **Assemble & Load** y luego avanzar con **Step**, observando registros, memoria, `PC` y banderas.
+
+### Conceptos Base
+
+| Concepto | Significado |
+| --- | --- |
+| `A` | Acumulador. Muchas operaciones aritméticas guardan el resultado aquí. |
+| `B`, `C`, `D`, `E`, `H`, `L` | Registros auxiliares de 8 bits. |
+| `PC` | Program Counter. Apunta a la próxima instrucción en memoria. |
+| `SP` | Stack Pointer. Apunta a la pila. |
+| `STA dir16` | Guarda el contenido de `A` en una dirección de memoria. |
+| `HLT` | Detiene el CPU. |
+| `INR R` | Incrementa un registro en 1. No existe `ICR`; la instrucción correcta es `INR`. |
+| `DCR R` | Decrementa un registro en 1. |
+
+### Operaciones Generales para Enseñar
+
+Para una clase conviene presentar primero la idea conocida por el estudiante y después mostrar cómo se expresa en el Intel 8080. No se empieza diciendo "vamos a ver `ADD`"; se empieza diciendo "vamos a sumar en el 8080".
+
+| Lo que entiende el alumno | Pregunta o problema | Cómo se hace en el 8080 | Instrucciones relacionadas |
+| --- | --- | --- | --- |
+| Sumar | ¿Cuánto da `A + B`? | Se carga un valor en `A`, otro en un registro, y se suma contra el acumulador. | `MVI`, `ADD`, `ADI` |
+| Restar | ¿Cuánto da `A - B`? | Se carga el minuendo en `A`, el sustraendo en otro registro, y se resta contra `A`. | `MVI`, `SUB`, `SUI` |
+| Saber si una resta dio negativa | ¿El primer número era menor que el segundo? | Se observa `CY`. En resta, `CY = 1` significa préstamo. | `SUB`, `CMP`, `JC` |
+| Comparar | ¿Son iguales? ¿Cuál es menor? | El CPU hace una resta interna sin guardar el resultado y solo cambia banderas. | `CMP`, `CPI`, `JZ`, `JNZ`, `JC`, `JNC` |
+| Tomar decisiones | Si pasa algo, ir a una parte; si no, seguir. | Se usan banderas como condiciones para saltar. Es la base de un `if`. | `JZ`, `JNZ`, `JC`, `JNC`, `JMP` |
+| Repetir | Hacer algo varias veces. | Se usa un contador que sube o baja y un salto condicional. Es la base de un ciclo. | `INR`, `DCR`, `JNZ`, `JMP` |
+| Multiplicar | Sumar el mismo número varias veces. | No existe `MUL`; se construye con sumas repetidas y un contador. | `ADD`, `DCR`, `JNZ` |
+| Dividir | Restar el mismo número varias veces. | No existe `DIV`; se construye con restas repetidas y un contador de cociente. | `SUB`, `INR`, `JC`, `JMP` |
+| Elevar a potencia | Multiplicar varias veces. | No existe potencia; se construye con multiplicaciones repetidas. | Bucles con `ADD`, `DCR`, `JNZ` |
+| Trabajar con bits | Encender, apagar, combinar o invertir bits. | Se usan operaciones lógicas bit a bit. Son parecidas a condiciones booleanas, pero aplicadas a cada bit del byte. | `ANA`, `ORA`, `XRA`, `CMA` |
+| Trabajar con valores de 16 bits | Usar direcciones o valores mayores a un byte. | Se usan pares de registros como `HL`, `BC` o `DE`. | `LXI`, `INX`, `DCX`, `DAD` |
+
+Comparar no es exactamente lo mismo que `AND`, `OR`, `XOR` o `NOT`. Comparar sirve para preguntar igualdad o orden usando banderas. Las operaciones lógicas sirven para manipular bits: `ANA` es AND, `ORA` es OR, `XRA` es XOR y `CMA` es NOT del acumulador.
+
+### Operaciones Lógicas Bit a Bit
+
+Estas operaciones no preguntan si un número es mayor o menor. Trabajan bit por bit dentro de un byte. Son útiles para encender bits, apagar bits, invertir bits o detectar patrones.
+
+| Operación lógica | Nombre común | Instrucciones 8080 | Idea |
+| --- | --- | --- | --- |
+| AND | Y lógico | `ANA R`, `ANI dato` | Un bit queda en `1` solo si ambos bits son `1`. |
+| OR | O lógico | `ORA R`, `ORI dato` | Un bit queda en `1` si cualquiera de los dos bits es `1`. |
+| XOR | O exclusivo | `XRA R`, `XRI dato` | Un bit queda en `1` si los bits son diferentes. |
+| NOT | Negación/inversión | `CMA` | Invierte todos los bits de `A`. |
+
+Ejemplo de AND:
+
+```assembly
+INICIO:
+MVI A, 0FH
+MVI B, 03H
+ANA B
+STA 210H
+HLT
+```
+
+Resultado esperado:
+
+- `0FH = 00001111`.
+- `03H = 00000011`.
+- `0FH AND 03H = 03H`.
+- Memoria `0210H = 03H`.
+
+Ejemplo de OR:
+
+```assembly
+INICIO:
+MVI A, 0CH
+MVI B, 03H
+ORA B
+STA 211H
+HLT
+```
+
+Resultado esperado:
+
+- `0CH = 00001100`.
+- `03H = 00000011`.
+- `0CH OR 03H = 0FH`.
+- Memoria `0211H = 0FH`.
+
+Ejemplo de XOR:
+
+```assembly
+INICIO:
+MVI A, 0FH
+MVI B, 03H
+XRA B
+STA 212H
+HLT
+```
+
+Resultado esperado:
+
+- `0FH = 00001111`.
+- `03H = 00000011`.
+- `0FH XOR 03H = 0CH`.
+- Memoria `0212H = 0CH`.
+
+Ejemplo de NOT:
+
+```assembly
+INICIO:
+MVI A, 0FH
+CMA
+STA 213H
+HLT
+```
+
+Resultado esperado:
+
+- `0FH = 00001111`.
+- `CMA` invierte todos los bits de `A`.
+- Resultado: `F0H = 11110000`.
+- Memoria `0213H = F0H`.
+
+### Hola Mundo
+
+El ejemplo de "Hola Mundo" no imprime en una pantalla real. Copia bytes ASCII a memoria, normalmente desde una cadena hacia una zona como `2000H`. Sirve para explicar que memoria puede contener código, datos y buffers.
+
+### Suma Básica
+
+```assembly
+MVI A, 5
+MVI B, 10
+ADD B
+STA 200H
+HLT
+```
+
+Resultado esperado:
+
+- `A = 0FH`, que equivale a `15` decimal.
+- `B = 0AH`, que equivale a `10` decimal.
+- Memoria `0200H = 0FH`.
+- `ADD B` significa `A = A + B`.
+
+### Resta con Resultado Positivo y Etiquetas
+
+```assembly
+INICIO:
+MVI A, 40
+MVI B, 15
+SUB B
+STA 203H
+JMP FIN
+
+FIN:
+HLT
+```
+
+Resultado esperado:
+
+- `40 - 15 = 25` decimal.
+- `25` decimal aparece como `19H`.
+- `A = 19H`.
+- Memoria `0203H = 19H`.
+
+### Resta con Resultado Negativo
+
+```assembly
+INICIO:
+MVI A, 10
+MVI B, 25
+SUB B
+STA 202H
+HLT
+```
+
+Resultado esperado:
+
+- Matemáticamente, `10 - 25 = -15`.
+- En 8 bits, el patrón guardado es `F1H`.
+- `F1H` puede leerse como `241` sin signo o como `-15` con signo.
+- `CY = 1` indica que hubo préstamo en la resta.
+- `S = 1` indica que el bit más alto del resultado está encendido.
+
+### Multiplicación por Sumas Repetidas
+
+El Intel 8080 no tiene instrucción `MUL`. Para multiplicar se suma repetidamente.
+
+Ejemplo: `5 * 3`.
+
+```assembly
+INICIO:
+MVI A, 0
+MVI B, 5
+MVI C, 3
+
+BUCLE:
+ADD B
+DCR C
+JNZ BUCLE
+
+STA 204H
+
+FIN:
+HLT
+```
+
+Resultado esperado:
+
+- `A = 0FH`, que equivale a `15` decimal.
+- Memoria `0204H = 0FH`.
+- `C` funciona como contador de repeticiones.
+
+### División por Restas Repetidas
+
+El Intel 8080 no tiene instrucción `DIV`. Para dividir se resta repetidamente y se cuenta cuántas veces fue posible restar.
+
+Ejemplo: `15 / 3`.
+
+```assembly
+INICIO:
+MVI A, 15
+MVI B, 3
+MVI C, 0
+
+BUCLE:
+SUB B
+JC FIN
+INR C
+JMP BUCLE
+
+FIN:
+MOV A, C
+STA 205H
+HLT
+```
+
+Resultado esperado:
+
+- `C = 05H`, porque `15 / 3 = 5`.
+- Al final se copia `C` hacia `A` con `MOV A, C`.
+- Memoria `0205H = 05H`.
+- `CY = 1` aparece cuando la última resta ya no se puede hacer sin préstamo.
+
+### Exponente por Multiplicaciones Repetidas
+
+El Intel 8080 tampoco tiene una instrucción de potencia. Una potencia se puede resolver repitiendo multiplicaciones, y cada multiplicación se puede resolver con sumas repetidas.
+
+Ejemplo: `2^3`.
+
+```assembly
+INICIO:
+MVI A, 1
+MVI B, 2
+MVI D, 3
+
+POTENCIA:
+MOV E, A
+MVI A, 0
+MOV C, B
+
+MULT:
+ADD E
+DCR C
+JNZ MULT
+DCR D
+JNZ POTENCIA
+
+STA 206H
+
+FIN:
+HLT
+```
+
+Resultado esperado:
+
+- `2^3 = 8` decimal.
+- `A = 08H`.
+- Memoria `0206H = 08H`.
+- `B` guarda la base.
+- `D` cuenta cuántas multiplicaciones faltan.
+- `C` cuenta las sumas internas de cada multiplicación.
+- `E` guarda temporalmente el resultado anterior.
+
+Este ejemplo es didáctico y asume exponentes positivos. Para enseñar, conviene primero dominar suma, resta, contadores y saltos antes de explicar potencia.
