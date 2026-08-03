@@ -22,11 +22,10 @@ La pantalla principal se divide en dos secciones principales:
 
 ### Controles Principales:
 - **Assemble & Load:** Toma el código escrito en el editor, lo compila a código binario de máquina (opcodes) en tiempo real, y lo carga en la memoria del CPU (empezando en la dirección especificada por `ORG` o por defecto en `0000H`).
-- **Clear Code (Limpiar Código):** Limpia completamente el cuadro del editor del Assembler y borra cualquier mensaje o error de la salida del ensamblador.
 - **Run:** Ejecuta el programa de forma continua a alta velocidad.
 - **Stop:** Detiene o pausa la ejecución continua para permitirte inspeccionar el estado actual de los registros y la memoria.
 - **Step:** Ejecuta una sola instrucción (paso a paso), ideal para depurar (debugging) y ver el efecto exacto de cada línea en los registros.
-- **Reset:** Detiene cualquier ejecución activa, limpia la memoria de la CPU (rellenándola con ceros), reinicia todos los registros a `00`, pone el Program Counter (`PC`) en `0000H`, restaura el puntero de pila (`SP`) a `FFFFH`, limpia la salida del ensamblador y restablece la vista de memoria inicial a `0000H`.
+- **Reset:** Reinicia todos los registros a `00`, pone el program counter (`PC`) en `0000H` y restaura el puntero de pila (`SP`) a `FFFFH`.
 - **Memory View (Visor de Memoria):** Te permite ingresar una dirección hexadecimal (por ejemplo, `2000`) y presionar **Go** para visualizar un mapa de memoria en tiempo real de 128 bytes contiguos a partir de esa dirección. El indicador amarillo resalta la posición actual del Program Counter (`PC`).
 
 ---
