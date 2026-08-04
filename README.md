@@ -1,105 +1,74 @@
-# Intel 8080 Emulator & Assembler - Version 2.1.0
+# Intel 8080 CPU Emulator & Assembler - Version 2.1.0
 
-A web-based Intel 8080 CPU emulator and assembler built with 100% pure JavaScript, HTML, and CSS. No frameworks, no dependencies. Designed for educational purposes and fully compatible with GitHub Pages.
-
----
-
-## What's New in Version 2.1.0 (V2.1) 🚀
-
-- **Stack View**: Interactive visual stack tracker panel displays the memory content around the Stack Pointer (`SP`), showing both 16-bit word values and high/low bytes.
-- **Explanatory Flag Tooltips**: Hovering over the state flags (`S`, `Z`, `AC`, `P`, `CY`) displays detailed Spanish definitions describing why they change and how they are calculated.
-- **Clear Code Button**: Added a new interactive "Clear Code" button next to "Assemble & Load" to easily clear the assembler code panel and status outputs.
-- **Improved Reset Behavior**: Pressing the "Reset" button now completely resets everything—clearing CPU memory, resetting registers and status flags, halting active program intervals, clearing compiler messages, and resetting the memory view's starting pointer back to `0000H`.
-- **Correct CPU Flag Management (V2)**:
-  - **Auxiliary Carry (`AC`) flag** calculations are fully corrected for subtraction instructions (`SUB`, `SBB`, `CMP`) and decrements (`DCR`), matching the exact micro-operation behaviors of the physical Intel 8080 chip.
-  - Added strict 8-bit masking (`& 0xFF`) on all rotates (`RLC`, `RAL`, etc.) to prevent accumulator overflow and ensure emulator stability.
-- **Enhanced Assembler (V2)**:
-  - Supports register pair aliases natively (`BC`, `DE`, `HL`, `SP`, `PSW`). For example, you can write `LXI BC, 1000H` and it compiles perfectly.
-  - Strict assembler validations that reject illegal combinations such as `MOV M, M` or invalid registers (e.g. `MOV B, X`).
-  - Strict validation of labels that prevents silent compilation failures when utilizing undefined labels.
-  - Fully supports `RST` (Restart) instruction assembly.
-- **Visual "Version 2.1" Badge**: Beautiful and stylized badge added to the header interface.
-- **Unit and Regression Test Suite**: A comprehensive test suite in `test.js` to ensure the core CPU and Assembler stability.
-- **Comprehensive Spanish Documentation (`INSTRUCTIONS.md`)**: A detailed manual detailing all commands, directives, registers, instruction sets, and a complete interactive **"Hello World"** template program!
+Bienvenidos al emulador y ensamblador de la arquitectura Intel 8080. Este proyecto ha sido construido desde cero utilizando tecnología 100% web pura (HTML5, CSS3 y Vanilla JavaScript) sin frameworks ni dependencias de ningún tipo, garantizando una carga instantánea y la máxima compatibilidad educativa.
 
 ---
 
-## Features
+## 🌟 ¿Por qué nació este proyecto? (Historia y Propósito)
 
-- **8080 CPU Core**: Accurate emulation of the Intel 8080 instruction set.
-  - Full support for Arithmetic, Logic, Data Transfer, Branching, and Stack instructions.
-  - Implemented `DAA` (Decimal Adjust Accumulator).
-  - Accurate Flag management (Sign, Zero, Auxiliary Carry, Parity, Carry).
-- **Integrated Assembler**: Write and assemble 8080 mnemonics directly in the browser.
-  - Supports labels and comments.
-  - Supports `ORG` and `DB` directives.
-  - Handles hex (e.g., `12H`, `0x12`) and decimal values.
-- **CPU Dashboard**:
-  - Real-time visualization of all registers (A, B, C, D, E, H, L, PC, SP).
-  - Individual flag indicators with detailed interactive tooltips.
-  - Interactive **Stack View** showing 16-bit word values and high/low bytes surrounding the Stack Pointer (`SP`).
-  - Status display (Idle, Running, Halted).
-- **8-bit Value Model**:
-  - Main registers store one byte (`00H` to `FFH`).
-  - Values can be interpreted as unsigned `0` to `255` or signed `-128` to `+127`.
-  - See `INSTRUCTIONS.md` for notes about overflow/truncation, such as `MVI A, 2400` keeping only the low byte.
-- **Interactive Memory Viewer**:
-  - Live memory grid with search-by-address functionality.
-  - Highlights the current instruction pointer (PC).
-- **Execution Controls**:
-  - **Assemble & Load**: Compiles your code and places it in memory.
-  - **Run**: Executes the code at high speed.
-  - **Stop**: Pauses execution.
-  - **Step**: Executes one instruction at a time.
-  - **Reset**: Clears registers and flags, resets PC to 0000H.
+En la enseñanza de la informática y la ingeniería de sistemas, existe una brecha pedagógica crítica al transicionar de lenguajes de alto nivel (como Python, Java o JavaScript) al entendimiento del hardware real. Los simuladores tradicionales de bajo nivel suelen ser difíciles de instalar, tienen interfaces obsoletas o carecen de feedback visual inmediato.
 
-## How to Use
-
-1. Open `index.html` in any modern web browser.
-2. Write your 8080 Assembly code in the "Assembler" text area.
-3. Click **Assemble & Load**.
-4. Use **Step** to debug or **Run** to execute the full program.
-5. Watch the **Registers** and **Memory View** to see your code in action.
-
-### Example Code (Hello World / Text Buffer Copy)
-See `INSTRUCTIONS.md` for a complete step-by-step interactive walk-through!
-```assembly
-; This program copies a string to 2000H
-        ORG 0000H
-        LXI HL, CADENA
-        LXI DE, 2000H
-BUCLE:  MOV A, M
-        CPI 0
-        JZ FIN
-        STAX DE
-        INX HL
-        INX DE
-        JMP BUCLE
-FIN:    HLT
-CADENA: DB 48H, 45H, 4CH, 4CH, 4FH, 20H, 4DH, 55H, 4EH, 44H, 4FH, 21H, 00H ; "HELLO MUNDO!"
-```
-
-## Project Structure
-
-- `index.html`: Main UI structure (with the Version 2 badge).
-- `styles.css`: UI styling and layout.
-- `cpu.js`: Intel 8080 CPU emulation logic (V2 accurate flag logic).
-- `assembler.js`: 8080 Assembler and machine code generator (with registers & labels validation).
-- `main.js`: UI integration and execution loop.
-- `INSTRUCTIONS.md`: Comprehensive user manual and interactive tutorial guide.
-- `test.js`: Core CPU and Assembler unit test file.
-
-## Running Tests
-
-To run the unit tests, execute:
-```bash
-node test.js
-```
-
-## Deployment
-
-Simply push this repository to GitHub and enable **GitHub Pages** in the repository settings.
+**Este simulador nació con el propósito de resolver este problema.** Su objetivo es democratizar la enseñanza de la arquitectura de computadoras proporcionando un entorno gráfico intuitivo, interactivo y moderno. Permite a los estudiantes "ver dentro" de una unidad central de procesamiento (CPU): observar cómo cambian los registros paso a paso, cómo fluyen los datos en la memoria RAM y cómo se comportan las banderas de estado (*flags*) en respuesta a operaciones aritméticas elementales.
 
 ---
-**Version**: 2.1.0
-**License**: MIT
+
+## 🛠️ ¿Para qué sirve?
+
+*   **Enseñanza Didáctica y Práctica:** Ideal para profesores y estudiantes de ciencias de la computación que desean experimentar la programación en lenguaje ensamblador sin la fricción de instalar herramientas en sistemas operativos locales.
+*   **Visualización de Flujo de Datos:** El panel interactivo permite observar las dinámicas de:
+    *   Los registros de propósito general y específicos.
+    *   Las operaciones de pila (*Stack*) con seguimiento visual directo de la dirección apuntada por `SP`.
+    *   La memoria RAM desglosada en un mapa bidimensional interactivo con localización instantánea.
+*   **Depuración Paso a Paso (*Debugging*):** Permite ejecutar programas instrucción por instrucción, deteniendo y analizando el procesador para encontrar errores de lógica con facilidad.
+
+---
+
+## 🚀 Novedades de la Versión 2.1.0
+
+Esta versión representa un gran salto adelante en la calidad del entorno de desarrollo web:
+- **Visualizador de Pila (*Stack View*):** Un componente visual que muestra los valores de 16 bits y bytes individuales que se encuentran en las posiciones de memoria alrededor de la dirección del puntero de pila (`SP`).
+- **Banderas Explicadas (*Tooltips*):** Al colocar el puntero del ratón sobre cualquiera de las banderas de estado (`S`, `Z`, `AC`, `P`, `CY`), se muestra un tooltip detallado en español explicando su lógica.
+- **Botón Clear Code:** Permite vaciar el editor del ensamblador y sus salidas con un solo clic.
+- **Reset Profundo:** Al reiniciar el CPU, se limpia la memoria por completo (rellenando con ceros), se resetean todos los registros, banderas y el visor de memoria se restablece a la dirección inicial `0000`.
+
+---
+
+## 📦 Características Principales
+
+*   **Núcleo de CPU Intel 8080 Completo:**
+    *   Emulación fiel del juego de instrucciones.
+    *   Gestión precisa de banderas (Sign, Zero, Auxiliary Carry, Parity, Carry).
+    *   Soporte completo de la instrucción decimal `DAA`.
+*   **Ensamblador Integrado:**
+    *   Soporta mnemónicos estándar, etiquetas (labels) y comentarios.
+    *   Directivas especiales como `ORG` (Origin) y `DB` (Define Byte).
+    *   Soporta alias de registros dobles (`BC`, `DE`, `HL`).
+*   **Cuadro de Mando Visual (Dashboard):**
+    *   Registros en tiempo real.
+    *   Estado del CPU (Ejecutando, En pausa, Halted).
+*   **Mapa de Memoria Dinámico:**
+    *   Visor de memoria con búsqueda hexadecimal y marcado de color para la posición actual del Program Counter (`PC`).
+
+---
+
+## 💻 Guía de Inicio Rápido
+
+Para utilizar el emulador de forma local en tu máquina o para desarrollo:
+
+1. **Clonar o descargar** este repositorio.
+2. Servir el proyecto localmente mediante cualquier servidor web estático. Por ejemplo, si tienes Python instalado, ejecuta en la terminal de la raíz:
+   ```bash
+   python3 -m http.server 8000
+   ```
+3. Abre tu navegador e ingresa a `http://localhost:8000`.
+4. ¡Comienza a escribir código ensamblador, presiona **Assemble & Load**, y ejecuta tu programa con **Run** o **Step**!
+
+---
+
+## 📝 Documentación Recomendada
+
+*   **`INSTRUCTIONS.md`:** Nuestro libro didáctico interactivo diseñado específicamente para que los estudiantes de alto nivel aprendan el funcionamiento práctico del ensamblador paso a paso, con guías estructuradas de aritmética, ciclos, condicionales y la pila.
+
+---
+**Versión del Proyecto:** 2.1.0
+**Licencia:** MIT
