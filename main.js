@@ -189,3 +189,92 @@ document.getElementById('btn-mem-go').addEventListener('click', () => {
 
 // Initial UI update
 updateUI();
+
+// Floating Point Coprocessor
+const fpu = new FloatingPointCoprocessor();
+
+const fpuA = document.getElementById("fpu-a");
+const fpuB = document.getElementById("fpu-b");
+const fpuOperation = document.getElementById("fpu-operation");
+const fpuCalculate = document.getElementById("fpu-calculate");
+const fpuResult = document.getElementById("fpu-result");
+const fpuOperationDisplay = document.getElementById("fpu-operation-display");
+
+
+fpuCalculate.addEventListener("click", () => {
+    try {
+        const a = fpuA.value;
+        const b = fpuB.value;
+        const operation = fpuOperation.value;
+
+        const result = fpu.calculate(operation, a, b);
+        const symbol = {
+                    ADD: "+",
+                    SUB: "−",
+                    MUL: "×",
+                    DIV: "÷"
+        }[operation];
+
+    fpuOperationDisplay.textContent = `${a} ${symbol} ${b}`;
+
+        
+
+        fpuResult.textContent = result;
+updateFPUChart(result);
+    } catch (error) {
+        fpuResult.textContent = error.message;
+    }
+});
+
+// FPU Performance Graph
+const fpuChartCanvas = document.getElementById('fpu-chart');
+console.log("FPU chart encontrada:", fpuChartCanvas);
+
+if (fpuChartCanvas) {
+    const fpuChartContext = fpuChartCanvas.getContext('2d');
+
+    const fpuChartData = {
+        labels: [],
+        values: []
+    };
+
+    function updateFPUChart(value) {
+    const result = Number(value);
+
+    // Guardar resultados
+    fpuChartData.labels.push(fpuChartData.labels.length + 1);
+    fpuChartData.values.push(result);
+
+    // Limpiar el gráfico
+    fpuChartContext.clearRect(
+        0,
+        0,
+        fpuChartCanvas.width,
+        fpuChartCanvas.height
+    );
+
+    // Ejes
+    fpuChartContext.beginPath();
+    fpuChartContext.moveTo(50, 20);
+    fpuChartContext.lineTo(50, 260);
+    fpuChartContext.lineTo(680, 260);
+    fpuChartContext.stroke();
+
+    // Dibujar todos los resultados
+    fpuChartData.values.forEach((result, index) => {
+        const x = 100 + index * 80;
+        const y = 260 - result * 10;
+
+        fpuChartContext.beginPath();
+        fpuChartContext.arc(x, y, 6, 0, Math.PI * 2);
+        fpuChartContext.fill();
+
+        fpuChartContext.font = "14px Arial";
+        fpuChartContext.fillText(
+            "R" + (index + 1) + ": " + result,
+            x - 20,
+            y - 12
+        );
+    });
+}
+}

@@ -96,8 +96,43 @@ HLT"></textarea>
         </section>
     </main>
 
+<section class="fpu-panel">
+    <h2>Floating Point Coprocessor (FPU)</h2>
+
+    <div class="fpu-controls">
+        <input type="number" id="fpu-a" step="any" placeholder="Número A">
+
+        <select id="fpu-operation">
+            <option value="ADD">+</option>
+            <option value="SUB">−</option>
+            <option value="MUL">×</option>
+            <option value="DIV">÷</option>
+        </select>
+
+        <input type="number" id="fpu-b" step="any" placeholder="Número B">
+
+        <button id="fpu-calculate">Calcular</button>
+    </div>
+
+    <div class="fpu-result">
+    Operacion: <span id="fpu-operation-display">--</span><br>
+    Resultado: <span id="fpu-result">--</span>
+    </div>
+
+    
+</section>
+
+<section class="fpu-chart-panel">
+    <h2>FPU Performance Graph</h2>
+
+   <canvas id="fpu-chart" width="1500" height="300"></canvas>
+</section>
+
     <script src="cpu.js"></script>
     <script src="assembler.js"></script>
+    <script src="fpu.js"></script>
     <script src="main.js"></script>
+
+    
 </body>
 </html>
